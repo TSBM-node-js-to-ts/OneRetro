@@ -1,0 +1,13 @@
+{
+  "name": "lookback",
+  "version": "1.0.0",
+  "description": "Simple reflection CRUD API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+
