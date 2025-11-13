@@ -17,16 +17,19 @@ class ReviewService {
 
   // 생성
   createReview(data) {
-    const { title, content, date } = data;
+    const { title, content} = data;
 
-    if (!title || !content) {
-      throw new Error('제목과 내용은 필수입니다.');
+    if (!title) {
+      throw new Error('제목을 입력하세요.');
+    }
+    else if (!content){
+      throw new Error('내용을 입력 후 저장해주세요.')
     }
 
     return reviewModel.create({
       title,
       content,
-      date: date || new Date().toISOString()
+      date: new Date().toISOString()
     });
   }
 
