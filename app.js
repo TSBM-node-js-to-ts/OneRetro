@@ -1,6 +1,6 @@
 const express = require('express');
 const { sequelize } = require('./models');
-const reviewsRouter = require('./routes/reviews');
+const reflectionsRouter = require('./routes/reflections');
 
 const app = express();
 app.use(express.json());
@@ -13,7 +13,7 @@ sequelize.sync({force:false})
     console.error('db 연결 실패', err);
   });
 
-app.use('/api/reviews', reviewsRouter);
+app.use('/api/reflections', reflectionsRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
