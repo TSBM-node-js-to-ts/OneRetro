@@ -1,61 +1,50 @@
-const reviewModel = require('../models/review');
+import { callWorker } from "./workerClient.js";
 
-class ReviewService {
+class ReflectionService {
   // 전체 조회
-  getAllReviews() {
-    return reviewModel.findAll();
+  async getAllReflections(userId) {
+    return callWorker(`/api/reflections?userId=${userId}`);
   }
 
   // 단건 조회
-  getReviewById(id) {
-    const review = reviewModel.findById(id);
-    if (!review) {
-      throw new Error('회고를 찾을 수 없습니다.');
-    }
-    return review;
+  async getReflectionById(id, userId) {
+    return callWorker(`/api/reflections/${id}?userId=${userId}`);
   }
 
   // 생성
-  createReview(data) {
+  async createReflection(userId, data) {
     const { title, content, date } = data;
 
     if (!title || !content) {
-      throw new Error('제목과 내용은 필수입니다.');
+      throw new Error("제목과 내용은 필수입니다.");
     }
 
-    return reviewModel.create({
-      title,
-      content,
-      date: date || new Date().toISOString()
+    return callWorker("/api/reflections", {
+      method: "POST",
+      body: JSON.stringify({
+        userId,
+        title,
+        content,
+        date: date || new Date().toISOString()
+      })
     });
   }
 
   // 수정
-  updateReview(id, data) {
-    const review = reviewModel.findById(id);
-    if (!review) {
-      throw new Error('회고를 찾을 수 없습니다.');
-    }
-
-    const updateData = {};
-    if (data.title) updateData.title = data.title;
-    if (data.content) updateData.content = data.content;
-    if (data.date) updateData.date = data.date;
-
-    return reviewModel.update(id, updateData);
+  async updateReflection(id, userId, data) {
+    return callWorker(`/api/reflections/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ userId, ...data })
+    });
   }
 
   // 삭제
-  deleteReview(id) {
-    const review = reviewModel.findById(id);
-    if (!review) {
-      throw new Error('회고를 찾을 수 없습니다.');
-    }
-
-    reviewModel.delete(id);
-    return true;
+  async deleteReflection(id, userId) {
+    return callWorker(`/api/reflections/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify({ userId })
+    });
   }
 }
 
-module.exports = new ReviewService();
-
+export default new ReflectionService();
