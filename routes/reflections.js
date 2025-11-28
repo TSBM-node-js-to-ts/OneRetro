@@ -1,12 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const reflectionService = require('../services/reflectionService');
+import express from 'express';
+import reflectionService from '../services/reflectionService.js';
+import { parseErrorStatus } from '../services/utils/parseErrorStatus.js';
 
-function parseErrorStatus(error, defaultStatus = 500) {
-  return error?.statusCode && Number.isInteger(error.statusCode)
-    ? error.statusCode
-    : defaultStatus;
-}
+const router = express.Router();
 
 // 회고 전체 조회
 router.get('/', async (req, res) => {
@@ -86,5 +82,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-module.exports = router;
-
+export default router;
