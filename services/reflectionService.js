@@ -1,4 +1,4 @@
-const { callWorker } = require('./utils/workerClient');
+import { callWorker } from "./utils/workerClient.js";
 
 const createValidationError = (message) => {
   const error = new Error(message);
@@ -71,5 +71,5 @@ class ReflectionService {
   }
 }
 
-module.exports = new ReflectionService();
 
+export default ReflectionService;
