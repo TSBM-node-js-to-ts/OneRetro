@@ -1,7 +1,9 @@
 import { handleReflections } from "./api/reflections.js";
 import { handleTags } from "./api/tags.js";
 import { handleAI } from "./api/ai.js";
-import { handleDebug } from "./api/debug.js";
+import { handleUsers } from "./api/users.js";
+import { handleReflectionTags } from "./api/reflectionTags.js";
+import { handleAnalytics } from "./api/analytics.js";
 import { respondError } from "./utils/respond.js";
 
 export default {
@@ -11,9 +13,9 @@ export default {
 		const method = request.method;
 
 		try {
-			// === Debug ===
-			if (path.startsWith("/api/debug")) {
-				return handleDebug(request, env);
+			// === User CRUD ===
+			if (path.startsWith("/api/users")) {
+				return handleUsers(request, env);
 			}
 
 			// === Reflection CRUD ===
@@ -24,6 +26,16 @@ export default {
 			// === Tag CRUD & Tag Generation ===
 			if (path.startsWith("/api/tags")) {
 				return handleTags(request, env);
+			}
+
+			// === Reflection-Tag relations ===
+			if (path.startsWith("/api/reflection-tags")) {
+				return handleReflectionTags(request, env);
+			}
+
+			// === Analytics ===
+			if (path.startsWith("/api/analytics")) {
+				return handleAnalytics(request, env);
 			}
 
 			// === AI Analysis ===

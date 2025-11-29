@@ -1,4 +1,3 @@
-// worker/src/api/tags.js
 import { respondJSON, respondError } from "../utils/respond.js";
 
 export async function handleTags(request, env) {
@@ -12,7 +11,9 @@ export async function handleTags(request, env) {
         // ------------------------------------------
         if (method === "GET" && path === "/api/tags") {
             const rows = await env.DB.prepare(`SELECT * FROM tags ORDER BY name ASC`).all();
-            return respondJSON(rows.results || []);
+            return respondJSON({
+                tags: rows.results || []
+            });
         }
 
         // ------------------------------------------
@@ -28,7 +29,23 @@ export async function handleTags(request, env) {
                 .bind(name)
                 .run();
 
-            return respondJSON({ id: stmt.lastRowId }, 201);
+            return respondJSON({ id: stmt.lastRowId, name }, 201);
+        }
+
+        // ------------------------------------------
+        // GET /api/tags/:id (태그 단건 조회)
+        // ------------------------------------------
+        const matchId = path.match(/^\/api\/tags\/(\d+)$/);
+        if (method === "GET" && matchId) {
+            const id = Number(matchId[1]);
+            const tag = await env.DB.prepare(
+                `SELECT * FROM tags WHERE id = ?`
+            )
+                .bind(id)
+                .first();
+
+            if (!tag) return respondError(404, "Tag not found");
+            return respondJSON(tag);
         }
 
         // ------------------------------------------
