@@ -1,34 +1,43 @@
 import { callWorker } from "./utils/workerClient.js";
 
 class TagService {
-    async getAllTags() {
-        return callWorker('/api/tags');
-    }
+	async getAllTags() {
+		const response = await callWorker('/api/tags');
+		return response?.tags ?? [];
+	}
 
-    async addTagToReflection(reflectionId, tagName) {
-        return callWorker(`/api/reflections/${reflectionId}/tags`, {
-            method: 'POST',
-            body: JSON.stringify({
-                tagName: tagName
-            })
-        });
-    }
+	async createTag(name) {
+		return callWorker('/api/tags', {
+			method: 'POST',
+			body: JSON.stringify({ name })
+		});
+	}
 
-    async removeTagFromReflection(reflectionId, tagName) {
-        return callWorker(`/api/reflections/${reflectionId}/tags`, {
-            method: 'DELETE',
-            body: JSON.stringify({
-                tagName: tagName
-            })
-        });
-    }
+	async getTagById(id) {
+		return callWorker(`/api/tags/${id}`);
+	}
 
-    async deleteTag(tagName) {
-        //수동 태그 삭제 기능을 위해 추가
-        return callWorker(`/api/tags/${tagName}`, {
-            method: 'DELETE'
-        });
-    }
+	async getTagsForReflection(reflectionId) {
+		const response = await callWorker(`/api/reflection-tags/${reflectionId}`);
+		return response?.tags ?? [];
+	}
+
+	async attachTag(reflectionId, tagId) {
+		return callWorker('/api/reflection-tags', {
+			method: 'POST',
+			body: JSON.stringify({
+				reflection_id: reflectionId,
+				tag_id: tagId
+			})
+		});
+	}
+
+	async detachTag(reflectionId, tagId) {
+		return callWorker(`/api/reflection-tags/${reflectionId}/${tagId}`, {
+			method: 'DELETE'
+		});
+	}
 }
 
-export default TagService;
+const tagService = new TagService();
+export default tagService;

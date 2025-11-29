@@ -12,14 +12,16 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "${DB_NAME}",
-			"database_id": "${DB_ID}"
+			"database_name": "lookback",
+			"database_id": "3f0b9ea8-bcdb-44ad-a1b7-334aa360e483",
+			"preview_database_id": "3e668aec-1050-4616-823c-3d24e9944ff7",
+			"remote": true
 		}
 	],
 	"ai": {
 		"binding": "AI"
 	},
 	"vars": {
-		"ENVIRONMENT": "${ENVIRONMENT}"
+		"ENVIRONMENT": "development"
 	}
 }

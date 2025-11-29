@@ -4,6 +4,7 @@ import { handleAI } from "./api/ai.js";
 import { handleUsers } from "./api/users.js";
 import { handleReflectionTags } from "./api/reflectionTags.js";
 import { handleAnalytics } from "./api/analytics.js";
+import { handleMemories } from "./api/memories.js";
 import { respondError } from "./utils/respond.js";
 
 export default {
@@ -36,6 +37,11 @@ export default {
 			// === Analytics ===
 			if (path.startsWith("/api/analytics")) {
 				return handleAnalytics(request, env);
+			}
+
+			// === AI Long-term Memories ===
+			if (path.startsWith("/api/memories")) {
+				return handleMemories(request, env);
 			}
 
 			// === AI Analysis ===

@@ -21,7 +21,8 @@ const assertId = (id) => {
 class ReflectionService {
   async getAllReflections(userId) {
     assertUserId(userId);
-    return callWorker(`/api/reflections?userId=${userId}`);
+		const response = await callWorker(`/api/reflections?userId=${userId}`);
+		return response?.reflections ?? [];
   }
 
   async getReflectionById(id, userId) {
@@ -33,7 +34,7 @@ class ReflectionService {
   async createReflection(userId, data = {}) {
     assertUserId(userId);
 
-    const { title, content, date } = data;
+		const { title, content, reflection_date: reflectionDate } = data;
 
     if (!title || !content) {
       throw createValidationError('제목과 내용은 필수입니다.');
@@ -41,12 +42,12 @@ class ReflectionService {
 
     return callWorker('/api/reflections', {
       method: 'POST',
-      body: JSON.stringify({
-        userId,
-        title,
-        content,
-        date: date || new Date().toISOString()
-      })
+			body: JSON.stringify({
+				userId,
+				title,
+				content,
+				reflection_date: reflectionDate || new Date().toISOString()
+			})
     });
   }
 
@@ -54,7 +55,7 @@ class ReflectionService {
     assertId(id);
     assertUserId(userId);
 
-    return callWorker(`/api/reflections/${id}`, {
+		return callWorker(`/api/reflections/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ userId, ...data })
     });
@@ -70,6 +71,5 @@ class ReflectionService {
     });
   }
 }
-
-
-export default ReflectionService;
+const reflectionService = new ReflectionService();
+export default reflectionService;

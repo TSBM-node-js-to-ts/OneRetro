@@ -1,7 +1,7 @@
 // Worker 공통 요청 유틸 함수
 const WORKER_BASE_URL = process.env.WORKER_BASE_URL || '';
 
-async function callWorker(path, options = {}) {
+export async function callWorker(path, options = {}) {
   const url = `${WORKER_BASE_URL}${path}`;
 
   const res = await fetch(url, {
@@ -23,7 +23,3 @@ async function callWorker(path, options = {}) {
 
   return res.json();
 }
-
-module.exports = {
-  callWorker
-};

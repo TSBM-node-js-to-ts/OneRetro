@@ -2,7 +2,7 @@ import { respondJSON, respondError } from "../utils/respond.js";
 
 const MODEL = "@cf/meta/llama-3-8b-instruct";
 const SYSTEM_PROMPT =
-    "You are an assistant for a personal reflection app. You MUST respond with valid JSON only. Do not wrap the JSON in markdown code fences.";
+	"You are an assistant for a personal reflection app. You MUST respond with valid JSON only (no markdown code fences). When the user payload includes a 'memory_context' array, use it to ground your analysis, avoid contradicting prior memories, and prefer referencing them concisely.";
 
 function parseJsonResponse(raw) {
     const trimmed = raw.trim();
