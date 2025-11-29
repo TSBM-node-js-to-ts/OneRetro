@@ -1,23 +1,45 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { handleReflections } from "./api/reflections.js";
+import { handleTags } from "./api/tags.js";
+import { handleAI } from "./api/ai.js";
+import { handleDebug } from "./api/debug.js";
+import { respondError } from "./utils/respond.js";
 
 export default {
-	async fetch(request, env, ctx) {
+	async fetch(request, env) {
 		const url = new URL(request.url);
-		switch (url.pathname) {
-			case '/message':
-				return new Response('Hello, World!');
-			case '/random':
-				return new Response(crypto.randomUUID());
-			default:
-				return new Response('Not Found', { status: 404 });
+		const path = url.pathname;
+		const method = request.method;
+
+		try {
+			// === Debug ===
+			if (path.startsWith("/api/debug")) {
+				return handleDebug(request, env);
+			}
+
+			// === Reflection CRUD ===
+			if (path.startsWith("/api/reflections")) {
+				return handleReflections(request, env);
+			}
+
+			// === Tag CRUD & Tag Generation ===
+			if (path.startsWith("/api/tags")) {
+				return handleTags(request, env);
+			}
+
+			// === AI Analysis ===
+			if (path.startsWith("/api/ai")) {
+				return handleAI(request, env);
+			}
+
+			// --- 404 fallback ---
+			return respondError(404, `No route matches ${path}`);
+		} catch (error) {
+			console.error("Worker Error:", error);
+
+			return respondError(
+				error.statusCode || 500,
+				error.message || "Internal Worker Error"
+			);
 		}
-	},
+	}
 };

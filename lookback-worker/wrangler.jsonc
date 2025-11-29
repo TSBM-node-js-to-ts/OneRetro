@@ -6,9 +6,6 @@
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
-	"assets": {
-		"directory": "./public"
-	},
 	"observability": {
 		"enabled": true
 	},
@@ -24,11 +21,5 @@
 	},
 	"vars": {
 		"ENVIRONMENT": "${ENVIRONMENT}"
-	},
-	"routes": [
-		{
-			"pattern": "${ROUTE_PATTERN}",
-			"zone_name": null
-		}
-	]
+	}
 }
