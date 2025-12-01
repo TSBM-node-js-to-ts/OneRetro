@@ -1,0 +1,84 @@
+.app {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.app-header {
+  background: white;
+  padding: 20px 40px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.new-reflection-btn {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.new-reflection-btn:hover {
+  background: #357abd;
+}
+
+.app-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right-panel {
+  min-height: 600px;
+}
+
+.reflection-detail {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reflection-detail h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.reflection-date {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 15px 0;
+}
+
+.reflection-content {
+  color: #333;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 1024px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+}
