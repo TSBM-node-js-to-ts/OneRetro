@@ -5,6 +5,8 @@ import { handleUsers } from "./api/users.js";
 import { handleReflectionTags } from "./api/reflectionTags.js";
 import { handleAnalytics } from "./api/analytics.js";
 import { handleMemories } from "./api/memories.js";
+import { handleSearch } from "./api/search.js";
+import { handleChat } from "./api/chat.js";
 import { respondError } from "./utils/respond.js";
 
 export default {
@@ -17,6 +19,11 @@ export default {
 			// === User CRUD ===
 			if (path.startsWith("/api/users")) {
 				return handleUsers(request, env);
+			}
+
+			// === Semantic search for reflections ===
+			if (path.startsWith("/api/notes/search")) {
+				return handleSearch(request, env);
 			}
 
 			// === Reflection CRUD ===
@@ -42,6 +49,11 @@ export default {
 			// === AI Long-term Memories ===
 			if (path.startsWith("/api/memories")) {
 				return handleMemories(request, env);
+			}
+
+			// === Chat with RAG ===
+			if (path === "/api/ai/chat") {
+				return handleChat(request, env);
 			}
 
 			// === AI Analysis ===

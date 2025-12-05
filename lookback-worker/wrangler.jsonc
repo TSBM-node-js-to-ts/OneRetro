@@ -4,24 +4,31 @@
 	"main": "src/index.js",
 	"compatibility_date": "2025-11-28",
 	"compatibility_flags": [
-		"nodejs_compat"
+	  "nodejs_compat"
 	],
 	"observability": {
-		"enabled": true
+	  "enabled": true
 	},
 	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "lookback",
-			"database_id": "3f0b9ea8-bcdb-44ad-a1b7-334aa360e483",
-			"preview_database_id": "3e668aec-1050-4616-823c-3d24e9944ff7",
-			"remote": true
-		}
+	  {
+		"binding": "DB",
+		"database_name": "lookback",
+		"database_id": "3f0b9ea8-bcdb-44ad-a1b7-334aa360e483",
+		"preview_database_id": "3e668aec-1050-4616-823c-3d24e9944ff7",
+		"remote": true
+	  }
 	],
 	"ai": {
-		"binding": "AI"
+	  "binding": "AI"
 	},
 	"vars": {
-		"ENVIRONMENT": "development"
-	}
-}
+	  "ENVIRONMENT": "development"
+	},
+	"vectorize": [
+	  {
+		"binding": "VECTORIZE",
+		"index_name": "reflections_index"
+	  }
+	]
+  }
+  

@@ -118,6 +118,20 @@ export const workerAPI = {
     });
   },
 
+  // Semantic Search
+  searchNotes: ({ query, userId, k = 6 }) => {
+    const params = new URLSearchParams({ query, userId, k }).toString();
+    return apiCall(`${WORKER_URL}/api/notes/search?${params}`);
+  },
+
+  // Chat with RAG
+  chat: (data) => {
+    return apiCall(`${WORKER_URL}/api/ai/chat`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
   // Analytics
   getReflectionCount: (userId) => {
     return apiCall(`${WORKER_URL}/api/analytics/reflection-count?userId=${userId}`);
@@ -153,6 +167,12 @@ export const workerAPI = {
   },
   analyzeFull: (data) => {
     return apiCall(`${WORKER_URL}/api/ai/analyze-full`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  generateTitle: (data) => {
+    return apiCall(`${WORKER_URL}/api/ai/generate-title`, {
       method: 'POST',
       body: JSON.stringify(data),
     });

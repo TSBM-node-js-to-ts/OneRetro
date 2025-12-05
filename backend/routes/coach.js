@@ -4,6 +4,39 @@ import { parseErrorStatus } from "../services/utils/parseErrorStatus.js";
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * tags:
+ *   - name: Coach
+ *     description: 회고 코칭/분석
+ */
+
+/**
+ * @openapi
+ * /api/coach/analyze:
+ *   post:
+ *     tags: [Coach]
+ *     summary: 회고 코칭 분석
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               reflectionId:
+ *                 type: integer
+ *               content:
+ *                 type: string
+ *             oneOf:
+ *               - required: [content]
+ *               - required: [userId, reflectionId]
+ *     responses:
+ *       200:
+ *         description: 분석 결과
+ */
 router.post("/analyze", async (req, res) => {
 	try {
 		const { userId, reflectionId, content } = req.body ?? {};

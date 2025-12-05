@@ -1,4 +1,8 @@
 import { respondJSON, respondError } from "../utils/respond.js";
+import {
+	upsertReflectionVector,
+	deleteReflectionVector
+} from "../utils/vector.js";
 
 function extractUserId(url, body = {}) {
     const params = Object.fromEntries(url.searchParams);
@@ -88,11 +92,21 @@ export async function handleReflections(request, env) {
                 .bind(userId, title, content, storedDate)
                 .run();
 
+            const createdId = stmt?.lastRowId ?? stmt?.meta?.last_row_id;
+
             const created = await env.DB.prepare(
                 `SELECT * FROM reflections WHERE id = ?`
             )
-                .bind(stmt.lastRowId)
+                .bind(createdId)
                 .first();
+
+            await upsertReflectionVector(env, {
+                id: created.id,
+                userId,
+                title,
+                content,
+                reflection_date: storedDate
+            });
 
             return respondJSON(created, 201);
         }
@@ -152,6 +166,14 @@ export async function handleReflections(request, env) {
                 .bind(id, userId)
                 .first();
 
+            await upsertReflectionVector(env, {
+                id,
+                userId,
+                title: updated?.title ?? title,
+                content: updated?.content ?? content,
+                reflection_date: updated?.reflection_date ?? reflectionDate
+            });
+
             return respondJSON(updated);
         }
 
@@ -192,6 +214,8 @@ export async function handleReflections(request, env) {
             )
                 .bind(id, userId)
                 .first();
+
+            await deleteReflectionVector(env, id);
 
             return respondJSON({
                 success: true,
