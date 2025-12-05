@@ -72,6 +72,22 @@ export const backendAPI = {
       body: JSON.stringify(data),
     });
   },
+
+  // AI Chat (RAG) via BFF
+  chat: (data) => {
+    return apiCall(`${BACKEND_URL}/api/ai/chat`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Title generation via BFF
+  generateTitle: (data) => {
+    return apiCall(`${BACKEND_URL}/api/ai/generate-title`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
 };
 
 // Worker API

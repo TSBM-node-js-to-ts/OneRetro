@@ -18,7 +18,8 @@
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e6e6e6;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .modal-header {
@@ -32,7 +33,7 @@
 .modal-header h2 {
   margin: 0;
   font-size: 24px;
-  color: #333;
+  color: #111;
 }
 
 .close-btn {
@@ -40,7 +41,7 @@
   border: none;
   font-size: 32px;
   cursor: pointer;
-  color: #666;
+  color: #111;
   line-height: 1;
   padding: 0;
   width: 32px;
@@ -51,7 +52,7 @@
 }
 
 .close-btn:hover {
-  color: #333;
+  color: #000;
 }
 
 .reflection-form {
@@ -62,19 +63,35 @@
   margin-bottom: 20px;
 }
 
+.secondary-btn {
+  margin-top: 8px;
+  background: #fff;
+  color: #111;
+  border: 1px solid #111;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #333;
+  color: #111;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
 }
@@ -82,7 +99,7 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #4a90e2;
+  border-color: #111;
 }
 
 .form-group textarea {
@@ -105,29 +122,29 @@
 
 .form-actions button {
   padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
+  border: 1px solid #111;
+  border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: transform 0.15s ease, background 0.2s ease;
 }
 
 .form-actions button[type="button"] {
-  background: #f0f0f0;
-  color: #333;
+  background: #fff;
+  color: #111;
 }
 
 .form-actions button[type="button"]:hover {
-  background: #e0e0e0;
+  transform: translateY(-1px);
 }
 
 .form-actions button[type="submit"] {
-  background: #4a90e2;
+  background: #111;
   color: white;
 }
 
 .form-actions button[type="submit"]:hover {
-  background: #357abd;
+  transform: translateY(-1px);
 }
 
 .form-actions button:disabled {

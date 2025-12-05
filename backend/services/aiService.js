@@ -15,38 +15,6 @@ class AIService {
 		});
 	}
 
-	async analyzeSentiment(payload) {
-		if (!payload?.content) throw createValidationError("content는 필수입니다.");
-		return callWorker("/api/ai/analyze-sentiment", {
-			method: "POST",
-			body: JSON.stringify(payload)
-		});
-	}
-
-	async extractKeywords(payload) {
-		if (!payload?.content) throw createValidationError("content는 필수입니다.");
-		return callWorker("/api/ai/extract-keywords", {
-			method: "POST",
-			body: JSON.stringify(payload)
-		});
-	}
-
-	async suggestTags(payload) {
-		if (!payload?.content) throw createValidationError("content는 필수입니다.");
-		return callWorker("/api/ai/suggest-tags", {
-			method: "POST",
-			body: JSON.stringify(payload)
-		});
-	}
-
-	async analyzeFull(payload) {
-		if (!payload?.content) throw createValidationError("content는 필수입니다.");
-		return callWorker("/api/ai/analyze-full", {
-			method: "POST",
-			body: JSON.stringify(payload)
-		});
-	}
-
 	async generateTitle(payload) {
 		if (!payload?.content) throw createValidationError("content는 필수입니다.");
 		return callWorker("/api/ai/generate-title", {

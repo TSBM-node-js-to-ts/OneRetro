@@ -2,6 +2,7 @@ import { callWorker } from "./utils/workerClient.js";
 import reflectionService from "./reflectionService.js";
 import tagService from "./tags.js";
 import memoryService from "./memoryService.js";
+import { callWorker as callWorkerDirect } from "./utils/workerClient.js";
 
 const AFFIRMATIONS = {
 	positive:
@@ -105,6 +106,69 @@ function selectAffirmation(sentimentLabel) {
 	);
 }
 
+function normalizeTags(raw = []) {
+	// handle cases where the model returns a JSON string containing tags
+	if (Array.isArray(raw)) {
+		return raw.map((t) =>
+			typeof t === "string"
+				? { name: t, confidence: 0.5 }
+				: t?.value
+					? { name: t.value, confidence: t.confidence ?? 0.5, description: t.description }
+					: t
+		);
+	}
+	if (typeof raw === "string") {
+		try {
+			const parsed = JSON.parse(raw);
+			if (Array.isArray(parsed?.tags)) {
+				return parsed.tags.map((t) =>
+					typeof t === "string"
+						? { name: t, confidence: 0.5 }
+						: t?.value
+							? { name: t.value, confidence: t.confidence ?? 0.5, description: t.description }
+							: t
+				);
+			}
+		} catch (_) {
+			return [{ name: raw, confidence: 0.5 }];
+		}
+	}
+	return [];
+}
+
+function buildFeedbackLines({ summary, sentimentLabel, keywords = [], tags = [] }) {
+	const lines = [];
+	if (summary) lines.push(`요약: ${summary}`);
+	lines.push(`분위기: ${sentimentLabel === "neutral" ? "중립적" : sentimentLabel}`);
+
+	if (keywords.length) {
+		const top = keywords
+			.slice(0, 3)
+			.map((k) => (typeof k === "string" ? k : k.word))
+			.filter(Boolean);
+		if (top.length) lines.push(`핵심 키워드: ${top.join(", ")}`);
+	}
+
+	const tagNames = tags
+		.map((t) => (typeof t === "string" ? t : t.name))
+		.filter(Boolean)
+		.slice(0, 3);
+	if (tagNames.length) {
+		lines.push(`태그 제안: ${tagNames.join(", ")}`);
+	}
+
+	// Generic reflective guidance (ensure ~5-7 lines)
+	lines.push(
+		"이번 주에 배운 점을 한 문장으로 정리해 보세요.",
+		"가장 아쉬웠던 부분을 적고, 다음 주에 개선할 액션 1가지를 정하세요.",
+		"잘한 점 1가지를 기록하고, 이를 반복할 방법을 적어보세요.",
+		"다음 주 우선순위 2가지를 정하고, 실행 조건(언제/어디서/어떻게)을 적어보세요."
+	);
+
+	// keep at most 10 lines
+	return lines.slice(0, 10);
+}
+
 async function safeCall(taskName, fn) {
 	try {
 		return await fn();
@@ -114,35 +178,55 @@ async function safeCall(taskName, fn) {
 	}
 }
 
+function parseMaybeJSON(text) {
+	if (!text || typeof text !== "string") return null;
+	const trimmed = text.trim();
+	try {
+		return JSON.parse(trimmed);
+	} catch {
+		try {
+			const cleaned = trimmed.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
+			return JSON.parse(cleaned);
+		} catch {
+			return null;
+		}
+	}
+}
+
+function extractSummary(rawSummary) {
+	if (!rawSummary) return null;
+	if (typeof rawSummary === "string") {
+		const parsed = parseMaybeJSON(rawSummary);
+		if (parsed?.summary) return parsed.summary;
+		if (parsed?.result) return parsed.result;
+		return rawSummary;
+	}
+	if (typeof rawSummary === "object" && rawSummary.summary) return rawSummary.summary;
+	return null;
+}
+
 class CoachService {
 	async generateCoaching({ userId, reflectionId, content }) {
-		if (!content && !reflectionId) {
-			const error = new Error("content 혹은 reflectionId 중 하나는 제공해야 합니다.");
-			error.statusCode = 400;
-			throw error;
-		}
-
 		let reflection = null;
 		let existingTags = [];
-		let sourceContent = content?.trim();
 
-		if (!sourceContent) {
+		// reflectionId가 있으면 DB에서 내용 우선 사용 (content는 무시하거나 fallback)
+		if (reflectionId) {
 			if (!userId) {
 				const error = new Error("reflectionId를 사용할 때는 userId도 필요합니다.");
 				error.statusCode = 400;
 				throw error;
 			}
-
 			reflection = await reflectionService.getReflectionById(reflectionId, userId);
-			sourceContent = reflection?.content?.trim();
-
-			if (!sourceContent) {
-				const error = new Error("해당 회고에서 분석할 내용을 찾지 못했습니다.");
-				error.statusCode = 404;
-				throw error;
-			}
-
 			existingTags = await tagService.getTagsForReflection(reflectionId);
+		}
+
+		let sourceContent = reflection?.content?.trim() || content?.trim();
+
+		if (!sourceContent) {
+			const error = new Error("분석할 content가 없습니다.");
+			error.statusCode = 400;
+			throw error;
 		}
 
 		const memories = userId
@@ -158,7 +242,8 @@ class CoachService {
 
 		const basePayload = {
 			content: sourceContent,
-			memory_context: memoryContext
+			memory_context: memoryContext,
+			response_language: "ko"
 		};
 
 		const [summaryRes, sentimentRes, keywordsRes, suggestedTagsRes, fullRes] =
@@ -168,7 +253,7 @@ class CoachService {
 						method: "POST",
 						body: JSON.stringify({
 							...basePayload,
-							task_hint: "brief summary with memory context"
+							task_hint: "brief summary with memory context; respond in Korean"
 						})
 					})
 				),
@@ -177,7 +262,7 @@ class CoachService {
 						method: "POST",
 						body: JSON.stringify({
 							...basePayload,
-							task_hint: "sentiment with memory context"
+							task_hint: "sentiment with memory context; respond in Korean"
 						})
 					})
 				),
@@ -186,7 +271,7 @@ class CoachService {
 						method: "POST",
 						body: JSON.stringify({
 							...basePayload,
-							task_hint: "keywords with memory context"
+							task_hint: "keywords with memory context; respond in Korean"
 						})
 					})
 				),
@@ -195,6 +280,7 @@ class CoachService {
 						method: "POST",
 						body: JSON.stringify({
 							...basePayload,
+							task_hint: "suggest tags in Korean",
 							existing_tags: existingTags.map((tag) => tag.name)
 						})
 					})
@@ -204,45 +290,71 @@ class CoachService {
 						method: "POST",
 						body: JSON.stringify({
 							...basePayload,
-							task_hint: "full analysis with memory context"
+							task_hint: "full analysis with memory context; respond in Korean"
 						})
 					})
 				)
 			]);
 
 		const summary = summaryRes?.summary ?? fullRes?.summary ?? null;
+		const cleanedSummary = extractSummary(summary) || summary || sourceContent;
+
 		const sentiment = sentimentRes?.sentiment ?? fullRes?.sentiment ?? null;
 		const keywords = keywordsRes?.keywords ?? fullRes?.keywords ?? [];
-		const suggestedTags =
-			suggestedTagsRes?.suggested_tags ?? fullRes?.suggested_tags ?? [];
+		const suggestedTags = suggestedTagsRes?.suggested_tags ?? fullRes?.suggested_tags ?? [];
 
 		const primaryEmotion = dominantEmotion(sentiment?.emotions);
 		const sentimentLabel = sentiment?.label ?? "neutral";
 
+		const cleanedTags = normalizeTags(suggestedTags);
 		const coaching = {
 			mood: {
 				label: sentimentLabel,
-				score: sentiment?.score ?? null,
 				dominant_emotion: primaryEmotion
 			},
-			affirmation: selectAffirmation(sentimentLabel),
-			action_items: buildActionItems(sentimentLabel, primaryEmotion),
-			follow_up_questions: buildFollowUpQuestions(sentimentLabel, primaryEmotion),
-			focus_points: buildFocusPoints(keywords),
-			recommended_tags: suggestedTags
+			feedback: buildFeedbackLines({
+				summary: cleanedSummary,
+				sentimentLabel,
+				keywords,
+				tags: cleanedTags
+			}),
+			tags: cleanedTags
 		};
 
-		if (userId && summary) {
+		if (userId && cleanedSummary) {
 			await memoryService.createMemory({
 				userId,
 				memoryType: "reflection_summary",
-				memory: summary,
+				memory: cleanedSummary,
 				metadata: {
 					reflectionId,
 					sentiment,
 					recommended_tags: suggestedTags,
-					action_items: coaching.action_items
+					feedback: coaching.feedback
 				}
+			});
+		}
+
+		// Save full coaching result for later retrieval
+		if (userId && reflectionId) {
+			const result = {
+				analysis: {
+					summary: cleanedSummary,
+					sentiment: sentiment
+						? { label: sentimentLabel, emotions: sentiment.emotions ?? null }
+						: { label: sentimentLabel, emotions: null },
+					keywords,
+					suggested_tags: cleanedTags
+				},
+				coaching
+			};
+			await callWorkerDirect("/api/coach/analysis", {
+				method: "POST",
+				body: JSON.stringify({
+					userId,
+					reflectionId,
+					result
+				})
 			});
 		}
 
@@ -257,9 +369,11 @@ class CoachService {
 				: null,
 			analysis: {
 				summary,
-				sentiment,
+				sentiment: sentiment
+					? { label: sentimentLabel, emotions: sentiment.emotions ?? null }
+					: { label: sentimentLabel, emotions: null },
 				keywords,
-				suggested_tags: suggestedTags
+				suggested_tags: cleanedTags
 			},
 			coaching
 		};

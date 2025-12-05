@@ -52,11 +52,13 @@ export async function handleMemories(request, env) {
 				.bind(userId, memoryType, memory, metadata ? JSON.stringify(metadata) : null)
 				.run();
 
+			const createdId = stmt?.lastRowId ?? stmt?.meta?.last_row_id;
+
 			const created = await env.DB.prepare(
 				`SELECT id, user_id, memory_type, memory, metadata, created_at
 				 FROM ai_memories WHERE id = ?`
 			)
-				.bind(stmt.lastRowId)
+				.bind(createdId)
 				.first();
 
 			return respondJSON(created, 201);

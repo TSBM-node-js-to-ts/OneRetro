@@ -31,51 +31,6 @@ router.post("/generate-title", wrap((req) => aiService.generateTitle(req.body)))
 
 /**
  * @openapi
- * /api/ai/summarize:
- *   post:
- *     tags: [AI]
- *     summary: 요약
- */
-router.post("/summarize", wrap((req) => aiService.summarize(req.body)));
-
-/**
- * @openapi
- * /api/ai/analyze-sentiment:
- *   post:
- *     tags: [AI]
- *     summary: 감정 분석
- */
-router.post("/analyze-sentiment", wrap((req) => aiService.analyzeSentiment(req.body)));
-
-/**
- * @openapi
- * /api/ai/extract-keywords:
- *   post:
- *     tags: [AI]
- *     summary: 키워드 추출
- */
-router.post("/extract-keywords", wrap((req) => aiService.extractKeywords(req.body)));
-
-/**
- * @openapi
- * /api/ai/suggest-tags:
- *   post:
- *     tags: [AI]
- *     summary: 태그 추천
- */
-router.post("/suggest-tags", wrap((req) => aiService.suggestTags(req.body)));
-
-/**
- * @openapi
- * /api/ai/analyze-full:
- *   post:
- *     tags: [AI]
- *     summary: 종합 분석
- */
-router.post("/analyze-full", wrap((req) => aiService.analyzeFull(req.body)));
-
-/**
- * @openapi
  * /api/ai/chat:
  *   post:
  *     tags: [AI]

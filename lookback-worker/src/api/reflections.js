@@ -69,7 +69,20 @@ export async function handleReflections(request, env) {
                 .first();
 
             if (!reflection) return respondError(404, "Reflection not found");
-            return respondJSON(reflection);
+
+            const tags = await env.DB.prepare(
+                `SELECT t.id, t.name
+                 FROM reflection_tags rt
+                 JOIN tags t ON t.id = rt.tag_id
+                 WHERE rt.reflection_id = ?`
+            )
+                .bind(id)
+                .all();
+
+            return respondJSON({
+                ...reflection,
+                tags: tags?.results ?? []
+            });
         }
 
         // ------------------------------------------

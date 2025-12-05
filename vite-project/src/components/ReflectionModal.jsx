@@ -8,6 +8,7 @@ export default function ReflectionModal({ isOpen, onClose, userId, onReflectionC
   const [reflectionDate, setReflectionDate] = useState(new Date().toISOString().split('T')[0]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,60 +29,31 @@ export default function ReflectionModal({ isOpen, onClose, userId, onReflectionC
         reflection_date: reflectionDate,
       });
 
-      // 2. AI 분석 및 코칭
-      const analysis = await backendAPI.analyzeReflection({
-        userId,
-        reflectionId: reflection.id,
-        content,
-      });
-
-      // 3. 추천 태그 생성 및 연결
-      if (analysis.suggestedTags && analysis.suggestedTags.length > 0) {
-        for (const tagName of analysis.suggestedTags) {
-          try {
-            // 태그가 없으면 생성
-            const tags = await workerAPI.getTags();
-            let tag = tags.find(t => t.name === tagName);
-            
-            if (!tag) {
-              tag = await workerAPI.createTag({ name: tagName });
-            }
-
-            // 회고에 태그 연결
-            await workerAPI.attachTag({
-              reflectionId: reflection.id,
-              tagId: tag.id,
-            });
-          } catch (err) {
-            console.error('태그 연결 실패:', err);
-          }
-        }
-      }
-
-      // 4. 장기 기억 생성 (분석 결과 기반)
-      if (analysis.summary) {
-        try {
-          await workerAPI.createMemory({
-            userId,
-            memoryType: 'reflection_insight',
-            memory: analysis.summary,
-            metadata: {
-              reflectionId: reflection.id,
-              sentiment: analysis.sentiment,
-            },
-          });
-        } catch (err) {
-          console.error('장기 기억 생성 실패:', err);
-        }
-      }
-
-      // 성공
       onReflectionCreated(reflection);
       handleClose();
     } catch (err) {
       setError(err.message || '회고 생성에 실패했습니다.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGenerateTitle = async () => {
+    if (!content.trim()) {
+      setError('내용을 먼저 입력해주세요.');
+      return;
+    }
+    setIsGeneratingTitle(true);
+    setError(null);
+    try {
+      const res = await backendAPI.generateTitle({ content });
+      if (res?.title) {
+        setTitle(res.title);
+      }
+    } catch (err) {
+      setError(err.message || '제목 생성에 실패했습니다.');
+    } finally {
+      setIsGeneratingTitle(false);
     }
   };
 
@@ -113,6 +85,14 @@ export default function ReflectionModal({ isOpen, onClose, userId, onReflectionC
               placeholder="회고 제목을 입력하세요"
               disabled={isLoading}
             />
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={handleGenerateTitle}
+              disabled={isLoading || isGeneratingTitle}
+            >
+              {isGeneratingTitle ? '생성 중...' : '제목 자동 생성'}
+            </button>
           </div>
 
           <div className="form-group">

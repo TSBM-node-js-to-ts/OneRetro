@@ -7,6 +7,7 @@ import { handleAnalytics } from "./api/analytics.js";
 import { handleMemories } from "./api/memories.js";
 import { handleSearch } from "./api/search.js";
 import { handleChat } from "./api/chat.js";
+import { handleCoachAnalysis } from "./api/coachAnalysis.js";
 import { respondError } from "./utils/respond.js";
 
 export default {
@@ -49,6 +50,11 @@ export default {
 			// === AI Long-term Memories ===
 			if (path.startsWith("/api/memories")) {
 				return handleMemories(request, env);
+			}
+
+			// === Coach Analysis history ===
+			if (path.startsWith("/api/coach/analysis")) {
+				return handleCoachAnalysis(request, env);
 			}
 
 			// === Chat with RAG ===
